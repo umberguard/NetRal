@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.agents/
+.claude/
+docs/
+CLAUDE.md
+CONTEXT.md
+HANDOFF.md
