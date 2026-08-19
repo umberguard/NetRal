@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* Neutri caldi anche fuori dal contenitore della pagina (rimbalzo dello
+   scroll, aree oltre il viewport). La famiglia di caratteri resta quella di
+   sistema, cioè il default di Tailwind: nessun font esterno da scaricare. */
+@layer base {
+  body {
+    background-color: var(--color-stone-50);
+  }
+}

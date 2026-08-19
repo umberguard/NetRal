@@ -1,0 +1,66 @@
+# Deploy del sito statico su GitHub Pages.
+#
+# ⚠️ OPERAZIONE MANUALE RICHIESTA UNA VOLTA SOLA: perché questo workflow possa
+# pubblicare, GitHub Pages va abilitato nel repository — Settings → Pages →
+# Build and deployment → Source: "GitHub Actions". Senza quel passaggio il job
+# `deploy` fallisce, perché l'ambiente `github-pages` non esiste ancora.
+#
+# Il sito risultante è servito da una sottocartella (https://<owner>.github.io/<repo>/):
+# funziona perché `vite.config.ts` usa `base: "./"`, quindi gli asset sono
+# referenziati relativamente all'HTML e non alla radice del dominio.
+
+name: Deploy su GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Permette di lanciare il deploy a mano dalla tab Actions.
+  workflow_dispatch:
+
+# Permessi minimi richiesti da actions/deploy-pages: leggere il codice,
+# scrivere su Pages, ottenere il token OIDC con cui Pages verifica il chiamante.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un deploy alla volta. Le run in coda non vengono annullate: l'ultimo commit
+# su main deve arrivare in produzione anche se ne arriva un altro nel frattempo.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` e non `npm install`: installa esattamente le versioni del
+      # lockfile e fallisce se package.json e package-lock.json divergono.
+      - run: npm ci
+
+      # I test girano PRIMA della build: un motore di calcolo rotto non deve
+      # arrivare in produzione. `npm run build` include già `tsc --noEmit`,
+      # quindi anche un errore di tipi blocca il deploy.
+      - run: npm test
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

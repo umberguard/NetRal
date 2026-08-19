@@ -2,7 +2,9 @@ node_modules/
 dist/
 .agents/
 .claude/
-docs/
+
+# Istruzioni di lavorazione dell'agente: non fanno parte della consegna.
 CLAUDE.md
-CONTEXT.md
-HANDOFF.md
+
+# Appunti di studio personali generati dalla skill grill-me.
+docs/gaps.md
