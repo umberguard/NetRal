@@ -38,6 +38,28 @@ const MENSILITA_AMMESSE: readonly Mensilita[] = [12, 13, 14];
 /** Riga del file di input: valori grezzi, chiave = intestazione di colonna. */
 export type RigaCsv = Record<string, string>;
 
+/**
+ * Il CSV di esempio mostrato nella sezione «Com'è fatto il CSV» della pagina
+ * batch e scaricato dal pulsante lì dentro. Vive qui, accanto al parser, per
+ * un motivo preciso: `csv.test.ts` lo dà in pasto a `leggiCsv` e a
+ * `elaboraRighe` e pretende zero note: se un giorno gli alias o le regole
+ * cambiassero, l'esempio documentato non potrebbe divergere in silenzio.
+ *
+ * Le righe coprono i casi che l'utente deve vedere: riga completa, comune
+ * scritto per nome anziché per slug, mensilità 14, cella comune vuota (scatta
+ * il predefinito scelto in pagina), RAL con decimali.
+ *
+ * Convenzione: separatore `,` e punto decimale — la forma anglosassone, quella
+ * che un foglio esporta di default. Il parser accetta anche `;` + virgola.
+ */
+export const CSV_ESEMPIO = `ral,comune,mensilita
+28000,napoli,13
+32000,Milano,13
+45000,salerno,14
+24000,,12
+36500.50,caserta,13
+`;
+
 // ---------------------------------------------------------------------------
 // Riconoscimento tollerante delle intestazioni (§9)
 // ---------------------------------------------------------------------------

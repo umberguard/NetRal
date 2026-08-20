@@ -20,6 +20,7 @@ import {
 } from "./csv";
 import { BannerAvviso } from "./componenti/BannerAvviso";
 import { AnteprimaEsito } from "./componenti/AnteprimaEsito";
+import { FormatoCsv } from "./componenti/FormatoCsv";
 import { GateAccesso } from "./componenti/GateAccesso";
 import { CAMPO, ETICHETTA } from "./componenti/ModuloInput";
 
@@ -43,7 +44,8 @@ function nomeEsito(nomeOriginale: string): string {
 /**
  * Salva il testo come file locale. È l'unico punto di tutta la fase che tocca
  * il DOM e le API del browser: `URL.createObjectURL` su un Blob costruito in
- * memoria, nessuna rete di mezzo.
+ * memoria, nessuna rete di mezzo. La usano sia il download dell'esito sia
+ * quello del CSV di esempio (passata come prop a `FormatoCsv`).
  *
  * Il BOM in testa non è superstizione: senza, Excel apre un CSV UTF-8 con la
  * codepage di sistema e "mensilità" diventa "mensilitÃ ".
@@ -179,10 +181,13 @@ export function PaginaBatch() {
               </label>
               <p className="mt-3 text-xs text-stone-600">
                 L'elaborazione avviene interamente nel tuo browser: nessun dato
-                viene inviato a server. Colonne riconosciute automaticamente:
-                RAL (obbligatoria), comune e mensilità (opzionali).
+                viene inviato a server.
               </p>
             </section>
+
+            {/* Il formato del file serve finché il file non c'è: appena è
+                caricato lascia il posto alla mappatura e all'anteprima. */}
+            {letto === null && <FormatoCsv onScarica={scarica} />}
 
             {erroreFile !== null && (
               <p
