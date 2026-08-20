@@ -5,6 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  CSV_ESEMPIO,
   elaboraRighe,
   leggiCsv,
   nomiColonneCalcolate,
@@ -64,6 +65,34 @@ describe("leggiCsv — riconoscimento tollerante delle colonne (§9)", () => {
     expect(letto.colonneRiconosciute.ral).toBeNull();
     // La pagina mostra queste colonne nel select di mappatura.
     expect(letto.colonne).toEqual(["matricola", "compenso"]);
+  });
+});
+
+describe("CSV_ESEMPIO — l'esempio documentato non può divergere dal parser", () => {
+  // È l'esempio mostrato e scaricato dalla sezione «Com'è fatto il CSV»: se
+  // domani un alias sparisse, un comune uscisse dalla matrice o cambiasse una
+  // soglia, l'utente scaricherebbe un file che la pagina non sa elaborare.
+  // Questi due test sono il guinzaglio.
+  const letto = leggiCsv(CSV_ESEMPIO);
+
+  it("fa riconoscere automaticamente tutte e tre le colonne", () => {
+    expect(letto.colonneRiconosciute).toEqual({
+      ral: "ral",
+      comune: "comune",
+      mensilita: "mensilita",
+    });
+    expect(letto.convenzione).toEqual({ separatore: ",", decimale: "." });
+    expect(letto.righe.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("si calcola senza una sola nota: nessun errore, nessun avviso di soglia", () => {
+    const esiti = elaboraRighe(
+      letto.righe,
+      { ral: "ral", comune: "comune", mensilita: "mensilita" },
+      PREDEFINITI,
+    );
+    expect(esiti.map((esito) => esito.note)).toEqual(esiti.map(() => []));
+    expect(esiti.every((esito) => esito.breakdown !== null)).toBe(true);
   });
 });
 
